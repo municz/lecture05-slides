@@ -1,0 +1,8 @@
+# 5. prednaska - Ruby on Rails
+
+* prednasim ja, mrazicz
+* budem pouzivat RoR 4.0
+* materialy pro cvika doplnim pozdeji, ale urcite si vytvorime nejakou
+  rychlou, strasne uzitecnou appku :)
+* ve slidech nenajdete nejspis moc uzitecnych veci, jsou to spise jen
+  poznamky a +- ukazka v jakem poradi budeme veci probirat
