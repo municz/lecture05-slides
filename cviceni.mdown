@@ -1,0 +1,154 @@
+# Cviceni Ruby on Rails
+
+## Motivace
+
+Na prednasce jsme si probrali nutnou teorii. Dnes si ukazeme jak lze v
+railsech rychle a bezbolestne vytvorit plne funkcni aplikaci. Vyvtorime
+si jednoduchy __blog__.
+
+## Na co nezapomenout a co se bude hodit
+
+* urcite budeme potrebovat ruby >= 1.9.2
+* z gemu si na zacatek vystacime: bundler a rails >= 4.0.0
+* budeme potrebovat pristup na internet
+* jake prikazy se budou hodit:
+
+            rake tasks      # vypise seznam dostupnych tasku
+            rails --help    # vypise seznam moznych prikazu
+            rails new myapp # vytvori novou railsovou aplikaci
+            rails s         # spusti vyvojovy server
+            rails c         # spusti interaktivni konzoli v kontextu aplikace
+            rails g --help  # vypise seznam dostupnych generatoru
+                            # kazdy subcommand ma zase help
+* nezapominejme pred kazdy prikaz vzdy uvadet bundle exec. Doporucuji si
+  vytvorit alias be pro tento prikaz. Alias si vytvorite takto:
+            
+            echo "alias be='bundle exec'" >> ~/.bashrc # pro bash
+            echo "alias be='bundle exec'" >> ~/.zshrc  # pro zsh
+
+## Zadani
+
+Blog bude mit prispevky. Kazdy prispevek bude mit hodne komentaru, ktere
+bude mozne mazat. Pridavani prispevku a mazani komentaru bude
+zabezpeceno pomoci http auth. Po pridani komentare prijde na email,
+ktery si zvolime notifikace o novem komentari.
+
+## Postup
+
+1. Vytvorte si novou rails aplikaci
+            
+            rails new nazev_aplikace # rails new --help pro vice info 
+2. Vlezte do adresare z aplikaci a v idealnim pripade si inicializujte
+   git repositar, pridejte vse a udeljte prvni commit.
+3. Zkuste spustit vyvojovy server a v prohlizeci bezte na
+   [localhost:3000](http://localhost:3000/) a zkontrolujte zda vam aplikace bezi
+4. Pokud jste na zacatku zvolili jako databazi mysql prejdete na tento
+   [odkaz](http://guides.rubyonrails.org/images/getting_started/rails_welcome.png)
+   , kde je znazornena uvodni stranka nove rails aplikace.
+   
+   Pokud pracujete s sqlite3 uvidite tuto aplikaci na vyse uvedene
+   adrese. Prectete si body uvedene na strance, zejmena bod 3. a
+   postupujte podle pokynu.
+5. Nyni mate vse potrebne pro tvoreni vaseho skveleho blogu :)
+6. Pomoci scaffoldu (<code>rails scaffold --help</code>) vytvorte model
+   Article. Model necht ma tyto atributy:
+  * author  (string)
+  * heading (string)
+  * perex   (text)
+  * body    (text)
+  * timestamps (railsi helper, bude pridan automaticky do migrace)
+7. Nyni mate vytvoren model, migraci, views, helper, controller a
+   assets a dokonce vytvorene routovani.
+   Vytvorily se nam rovnez soubory pro testy. Ty ale nebudeme pouzivat, 
+   prednaska o testovani jiz byla.
+
+8. Zkuste [/articles](http://localhost:3000/articles) zda vse funguje
+   jak ma. Nefunguje? To proto ze nemame vytvorenou v db tabulku. Proto
+   musime spustit migraci db.
+
+            rake db:migrate
+9. Nyni v config/routes.rb vyhledejte klicove slovo root a nastavte root na
+   index stranku ArticlesController. Root znamena defaultni smerovani,
+   to znamena [localhost:3000/](http://localhost:3000) . Otestujte.
+10. Zkuste v prohlizeci pridat, editovat a smazat Article. Pokud vse
+    funguje jak ma, spustte si rails konzoli a zkuste si tyto prikazy:
+
+            rails c # spustime konzoli, sipky nize samozrejme vynechat
+            >> Article.all
+            >> Article.count
+            >> article = Article.new(author: 'Test User', body: 'Body', perex: 'Perex', heading: 'First awesome article!')
+            >> Article.count
+            >> article.save
+            >> Article.count
+            >> # a dalsich mnoho metod jako #where, #first, #last, #order. Pro vice info kuk do dokumentace :)
+            >> article = Article.first
+            >> puts article.heading
+            >> article.update_attribute(:heading, 'Heading was changed!')
+            >> puts Article.first.heading
+            >> # etc., verte neverte, v konzoli se travi hodne casu,
+            >> # obzvlaste pri debugovani a vytvareni nove
+            >> # funkcionality. Rychle zmeny v databazi take nejsou
+            >> # vyjimkou, rozhodne je to pohodlnejsi nez SQL.
+11. Nyni zabezpecte cely ArticleController krome #index a #show pomoci http
+    auth. Inspiraci necht je tato
+    [stranka](http://railscasts.com/episodes/82-http-basic-authentication).
+12. Nezapomneli jsme na neco? heading, author atd. muzou byt prazdne a
+    to my prece nechceme. Pridejte validaci na vsechny atributy modelu
+    Article. Pozadujeme aby vsechna pole byly vyplnena s vyjimkou
+    perexu.
+    [hint](http://apidock.com/rails/ActiveRecord/Validations/ClassMethods/validates_presence_of).
+    Vsimnete si, ze metoda pirjima vice paramteru najednou, tudiz neni nutne rozepisovat kazdy atribut na jeden radek.
+    Dnes si nebudeme zkouset dalsi validace, ale proctete si pravy
+    sloupecek na vyse uvedene strance, kde jsou vypsany dalsi
+    validatory.
+13. Do modelu se muzou pridavat callbacky. Jsou to metody (vetsinou)
+    volany za urcitych okolnosti. Napriklad callback
+            
+            class Article < ActiveRecord::Base
+              # bude zavolan pokazde tesne pred ulozenim objektu do databaze. Bude volana privatni metoda set_perex
+              before_save :set_perex
+
+              private
+
+              # metoda nastavi perex pokud je prazdny tesne pred ulozenim. Takze do db jiz perex bude ulozen.
+              def set_perex
+                self.perex = body[0..50] if perex.blank?
+                # pokud perex je prazdny, nastavme jako perex prvnich 50 znaku z body.
+                # toto reseni ma samozrejme mnoho chyb, muze useknout slovo apod.
+              end
+            end
+
+    Pro zvedave: [odkaz](http://api.rubyonrails.org/classes/ActiveRecord/Callbacks.html)
+
+14. Inspirujte se callbackem vyse. Pridejte jej do sve aplikace a
+    upravte metodu set_perex tak, aby jako perex nastavila prvnich 20
+    slov z body pokud je perex prazdny.
+    [reseni](https://www.google.cz/search?q=ruby+how+to+get+first+n+words&oq=ruby+how+to+get+first+n+words)
+15. Zkuste nyni pridat clanek napr. s prazdnym body a sledujte co se
+    stane. Clanek by se nemel ulozit a mela by na vas vyskocit errorova
+    hlaska. V konzoli lze vyzkouset napr. takto: <code>Article.create!(author: 'Author')</code>
+16. Zkuste vlozit clanek (v konzoli nebo v prohlizeci), kde vyplnite vse
+    krome perexu. Zvolte dostatecne dlouhe body. Podivejte se zda se
+    perex vytvoril a spravne ulozil.
+17. V app/views/articles/ muzete najit jednotlive sablony pro nahled.
+    Upravte index a show tak, aby zobrazoval linky na editaci, mazani
+    apod. pouze pro prihlaseneho uzivatele. Abyste byli schopni rozeznat
+    prihlaseneho uzivatele bude potreba si v kousku kodu, ktery slouzi
+    pro prihlaseni nastavit nejakou instancni promennou. Ukazeme si na
+    tabuli.
+18. Nyni je vhodna doba udelat prvni commit do git repositare. Pokud
+    jste si na zacatku neinicializovali git repositar udelejte tak nyni.
+    Provedte prvni idealne jiz druhy commit.
+19. Ted si nas blog rozsirme o komentare. Pomoci scaffold vygenerujte
+    model Comment. Pridejte "cizi klic" pro id clanku. 
+            
+            rails g scaffold comment body:text email:string article:references
+20. Spustte migrace. Propojte modely. Zkuste do google zadat _rails many to one relationship_ a najdete
+    vhodny zpusob jak tyto modely propojit.
+21. Pridejte do Comment validace na pritomnost body a email.
+22. Na [/comments](http://localhost:3000/comments) si zkuste pridavat,
+    menit a editovat commenty.
+23. Nyni si pohrajeme s commenty. Jako samostatne editovatelne nam jsou
+    k nicemu. Od tohoto kroku jiz budeme pokracovat spolecne.
+
+
