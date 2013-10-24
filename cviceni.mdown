@@ -50,7 +50,7 @@ ktery si zvolime notifikace o novem komentari.
    adrese. Prectete si body uvedene na strance, zejmena bod 3. a
    postupujte podle pokynu.
 5. Nyni mate vse potrebne pro tvoreni vaseho skveleho blogu :)
-6. Pomoci scaffoldu (<code>rails scaffold --help</code>) vytvorte model
+6. Pomoci scaffoldu (<code>rails generate scaffold --help</code>) vytvorte model
    Article. Model necht ma tyto atributy:
   * author  (string)
   * heading (string)
