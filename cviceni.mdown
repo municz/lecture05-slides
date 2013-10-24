@@ -38,6 +38,8 @@ ktery si zvolime notifikace o novem komentari.
 1. Vytvorte si novou rails aplikaci
             
             rails new nazev_aplikace # rails new --help pro vice info 
+2a. Windows - odmazani turboliku:
+   z GemFile + assets/js + layout/view
 2. Vlezte do adresare z aplikaci a v idealnim pripade si inicializujte
    git repositar, pridejte vse a udeljte prvni commit.
 3. Zkuste spustit vyvojovy server a v prohlizeci bezte na
